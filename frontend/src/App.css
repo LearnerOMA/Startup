@@ -1,0 +1,174 @@
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.with-sidebar .main-content {
+  margin-left: 220px; /* Updated to match new sidebar width */
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.with-collapsed-sidebar .main-content {
+  margin-left: 60px; /* Updated to match collapsed sidebar width */
+  width: calc(100% - 60px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.app-container:not(.with-sidebar) .main-content {
+  margin-left: 0;
+  width: 100%;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+}
+
+.page-container {
+  padding: 1.5rem; /* Reduced from 2rem */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 3.5rem; /* Reduced from 4rem */
+}
+
+/* For pages with default content that don't provide their own container */
+.page-container > div:not(.home-container) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Smooth transitions */
+*, *:before, *:after {
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Improved scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 6px; /* Reduced from 8px */
+  height: 6px; /* Reduced from 8px */
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .with-sidebar .main-content,
+  .with-collapsed-sidebar .main-content,
+  .app-container:not(.with-sidebar) .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .page-container {
+    padding: 1rem;
+    margin-top: 3.5rem;
+  }
+}
+
+/* Improved focus states for accessibility - updated to match purple theme */
+a:focus, button:focus, input:focus, textarea:focus, select:focus {
+  outline: 2px solid #7b61ff;
+  outline-offset: 2px;
+}
+
+/* Card styling for content boxes - added to match Home.css theme */
+.card {
+  background: linear-gradient(145deg, #1c1c1c, #252525);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 1.5rem;
+  transition: all 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(123, 97, 255, 0.2);
+}
+
+/* Button styling to match Home.css */
+.button {
+  padding: 12px 28px;
+  font-size: 1.1rem;
+  color: #fff;
+  background: linear-gradient(90deg, #7b61ff, #6a4fff);
+  text-decoration: none;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: linear-gradient(90deg, #8671ff, #7b61ff);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(123, 97, 255, 0.4);
+}
+
+/* Text highlight color to match Home.css */
+.highlight-text {
+  background: linear-gradient(90deg, #7b61ff, #3dcfff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+/* Print styles for better printing experience */
+@media print {
+  .app-container {
+    display: block;
+    background-color: white;
+    color: black;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    background: none;
+  }
+  
+  .sidebar, .navbar {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+}
