@@ -1,6 +1,6 @@
 import React from 'react';
 import './ChatMessage.css';
-
+// janhvi comment.
 const ChatMessage = ({ message, isUser }) => {
   return (
     <div className={`chat-message ${isUser ? 'user-message' : 'bot-message'}`}>
