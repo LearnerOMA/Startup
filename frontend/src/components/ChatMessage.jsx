@@ -1,6 +1,7 @@
 import React from 'react';
 import './ChatMessage.css';
 // janhvi comment.
+// om commit
 const ChatMessage = ({ message, isUser }) => {
   return (
     <div className={`chat-message ${isUser ? 'user-message' : 'bot-message'}`}>
