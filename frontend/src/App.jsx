@@ -2,6 +2,7 @@ import React, { useState, createContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Chatbot from './pages/Chatbot';
+import FineTunedChatbot from './pages/FineTunedChatbot';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import QuestionGenerator from './pages/QuestionGenerator';
@@ -43,6 +44,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/chatbot" element={<Chatbot />} />
+              <Route path="/fine-tuned-chatbot" element={<FineTunedChatbot />} />
               <Route path="/question-generator" element={<QuestionGenerator />} />
               <Route path="/quiz-generator" element={<div>Quiz Generator Page</div>} />
               <Route path="/news-aggregator" element={<NewsAggregator />} />

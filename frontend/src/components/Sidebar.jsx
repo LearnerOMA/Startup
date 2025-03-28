@@ -31,6 +31,7 @@ const Sidebar = () => {
   const mainMenuItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/chatbot', label: 'Chatbot', icon: '💬' },
+    { path: '/fine-tuned-chatbot', label: 'Fine-Tuned Chatbot', icon: '🤖' },
     { path: '/question-generator', label: 'Questions', icon: '❓' },
     { path: '/quiz-generator', label: 'Quiz', icon: '📝' },
     { path: '/news-aggregator', label: 'News', icon: '📰' },
