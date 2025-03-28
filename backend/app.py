@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from scrapData import scrapdata
 from chatbot import generate_chat_response
 from translate import translate_text
+from finetuned import generate_fine_tuned_response 
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -46,6 +47,20 @@ def translate():
 
     translated_text = translate_text(text, LANGUAGES[language])
     return jsonify({"translated_text": translated_text})
+
+@app.route('/fine-tuned-chat', methods=['POST'])
+def fine_tuned_chat():
+    data = request.json
+    messages = data.get('messages', [])
+
+    if not messages:
+        return jsonify({'error': 'No messages provided'}), 400
+
+    try:
+        response_text = generate_fine_tuned_response(messages)
+        return jsonify({'message': response_text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
