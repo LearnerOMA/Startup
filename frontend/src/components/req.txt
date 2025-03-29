@@ -1,0 +1,22 @@
+1.rag based chatbot 
+2.any website scrap
+3.handwritten notes chatting and summarization
+5.chatbot :
+    a] basic chatbot - gemini done
+    b] rag based chatbot done
+    c] fine tuned chatbot done
+    d] pdf,doc,p
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    pt,handwritten notes - chatbot

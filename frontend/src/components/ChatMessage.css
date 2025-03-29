@@ -41,11 +41,12 @@
     border-radius: 1rem;
     position: relative;
     margin-bottom: 0.25rem;
+    text-align: left;
   }
   
   .user-message .message-text {
-    background-color: #3498db;
-    color: white;
+    background-color: #f1f1f1;
+    color: #333;
     border-top-right-radius: 0.25rem;
   }
   
@@ -64,3 +65,29 @@
   .user-message .message-time {
     text-align: right;
   }
+
+.message-line {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.message-line:first-child {
+  margin-top: 0;
+}
+
+.message-line:last-child {
+  margin-bottom: 0;
+}
+
+.message-line + .message-line {
+  margin-top: 0.75rem;
+}
+
+.bullet-point {
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.message-text strong {
+  font-weight: 600;
+}

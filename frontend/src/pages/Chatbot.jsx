@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../components/ChatMessage';
+import DocumentChatbot from './DocumentChatbot';
 import './Chatbot.css';
 
 const Chatbot = () => {
+  const [chatMode, setChatMode] = useState('general'); // 'general' or 'document'
   const [messages, setMessages] = useState([
     { 
       text: "Hello! I'm your UPSC & MPSC exam assistant. How can I help you today?", 
@@ -19,14 +21,14 @@ const Chatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
-  useEffect(() => {
-    // Focus the input field when the component mounts
-    inputRef.current?.focus();
-  }, []);
+  // useEffect(() => {
+  //   // Focus the input field when the component mounts
+  //   inputRef.current?.focus();
+  // }, []);
 
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
@@ -63,7 +65,6 @@ const Chatbot = () => {
     setIsTyping(false);
   };
   
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSendMessage();
@@ -74,6 +75,24 @@ const Chatbot = () => {
     setInput(suggestion);
     inputRef.current?.focus();
   };
+
+  const handleModeChange = (mode) => {
+    setChatMode(mode);
+    // Reset messages if switching to general chat
+    if (mode === 'general') {
+      setMessages([
+        { 
+          text: "Hello! I'm your UPSC & MPSC exam assistant. How can I help you today?", 
+          isUser: false,
+          timestamp: new Date()
+        }
+      ]);
+    }
+  };
+
+  if (chatMode === 'document') {
+    return <DocumentChatbot onSwitchMode={handleModeChange} />;
+  }
 
   return (
     <div className="chatbot">
@@ -87,9 +106,27 @@ const Chatbot = () => {
         </div>
       </div>
       
+      {/* Chat Mode Slider */}
+      <div className="chat-mode-slider">
+        <div className="slider-container">
+          <button 
+            className={`slider-option ${chatMode === 'general' ? 'active' : ''}`} 
+            onClick={() => handleModeChange('general')}
+          >
+            General Chat
+          </button>
+          <button 
+            className={`slider-option ${chatMode === 'document' ? 'active' : ''}`} 
+            onClick={() => handleModeChange('document')}
+          >
+            Document Chat
+          </button>
+        </div>
+      </div>
+      
       <div className="chat-window">
         {messages.map((msg, index) => (
-          <ChatMessage key={index} message={msg} />
+          <ChatMessage key={index} message={msg} isUser={msg.isUser} />
         ))}
         
         {isTyping && (

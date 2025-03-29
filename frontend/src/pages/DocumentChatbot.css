@@ -1,0 +1,248 @@
+.document-chatbot {
+    width: 100%;
+    max-width: 800px;
+    height: 600px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  .chatbot-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  .chatbot-icon {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 24px;
+  }
+  
+  .chatbot-header h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .chatbot-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  
+  .chat-mode-slider {
+    padding: 10px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #1c1c1c;
+  }
+  
+  .slider-container {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .slider-option {
+    flex: 1;
+    padding: 8px 12px;
+    text-align: center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: 500;
+  }
+  
+  .slider-option.active {
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  .document-upload-section {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .upload-button {
+    padding: 8px 16px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+  }
+  
+  .upload-button:hover {
+    background-color: #1a2530;
+  }
+  
+  .upload-button:disabled {
+    background-color: #808080;
+    cursor: not-allowed;
+  }
+  
+  .document-info {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+    padding: 5px 10px;
+    background-color: white;
+    border-radius: 4px;
+    max-width: 300px;
+    overflow: hidden;
+  }
+  
+  .document-icon {
+    margin-right: 8px;
+  }
+  
+  .document-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+  }
+  
+  .chat-window {
+    flex: 1;
+    padding: 15px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .typing-indicator {
+    display: flex;
+    padding: 8px 15px;
+    border-radius: 18px;
+    background-color: #f0f0f0;
+    width: fit-content;
+    margin: 5px 0;
+  }
+  
+  .typing-indicator .dot {
+    width: 8px;
+    height: 8px;
+    background-color: #757575;
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: bounce 1.3s linear infinite;
+  }
+  
+  .typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  
+  .typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  
+  .chat-input {
+    display: flex;
+    padding: 15px 20px;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .chat-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+  }
+  
+  .chat-input button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #2c3e50;
+    border: none;
+    color: white;
+    margin-left: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+  }
+  
+  .chat-input button:hover {
+    background-color: #1a2530;
+  }
+  
+  .chat-input button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .chatbot-suggestions {
+    padding: 15px 20px;
+    background-color:#1c1c1c;
+    border-top: 1px solid #1c1c1c;
+  }
+  
+  .suggestion-label {
+    font-size: 12px;
+    color: white;
+    margin-bottom: 8px;
+  }
+  
+  .suggestion-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .suggestion-buttons button {
+    padding: 6px 12px;
+    background-color:#1c1c1c;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .suggestion-buttons button:hover {
+    background-color: #e0e0e0;
+    color: #1c1c1c;
+  }
+  
+  @media (max-width: 768px) {
+    .document-chatbot {
+      height: 100vh;
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
