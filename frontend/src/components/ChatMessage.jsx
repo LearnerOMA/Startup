@@ -1,7 +1,10 @@
 import React from 'react';
 import './ChatMessage.css';
-const ChatMessage = ({ message, isUser }) => {
+import PDFViewerWithHighlights from './PDFViewerWithHighlights';
+import { useState } from 'react';
 
+const ChatMessage = ({ message, isUser }) => {
+  const [showHighlights, setShowHighlights] = useState(false);
   
   const processText = (text) => {
     // Split by newlines
@@ -40,6 +43,25 @@ const ChatMessage = ({ message, isUser }) => {
           <div className="message-time">
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
+        )}
+
+        {/* Show "View References" button only if available */}
+        {!isUser && message.references && message.fileUrl && (
+          <>
+            <button
+              className="mt-2 bg-blue-500 text-white py-1 px-3 rounded text-sm"
+              onClick={() => setShowHighlights(!showHighlights)}
+            >
+              {showHighlights ? 'Hide References' : 'View References in PDF'}
+            </button>
+
+            {showHighlights && (
+              <PDFViewerWithHighlights
+                fileUrl={message.fileUrl}
+                references={message.references}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

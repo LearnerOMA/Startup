@@ -24,9 +24,9 @@ const DocumentChatbot = ({ onSwitchMode }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-//   useEffect(() => {
-//     scrollToBottom();
-//   }, [messages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     // Focus the input field when the component mounts
@@ -180,13 +180,13 @@ const DocumentChatbot = ({ onSwitchMode }) => {
       <div className="chat-mode-slider">
         <div className="slider-container">
           <button 
-            className={`slider-option`} 
+            className="slider-option" 
             onClick={() => onSwitchMode('general')}
           >
             General Chat
           </button>
           <button 
-            className={`slider-option active`}
+            className="slider-option active"
           >
             Document Chat
           </button>

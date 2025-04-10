@@ -1,7 +1,7 @@
 import json
 from flask import Flask, request, jsonify
 from scrapData import scrapdata
-from chatbot import generate_chat_response, save_uploaded_document, generate_document_response ,generate_rag_response
+from chatbot import generate_chat_response, save_uploaded_document, generate_document_response,generate_rag_response
 from translate import translate_text
 from finetuned import generate_fine_tuned_response 
 from flask_cors import CORS
@@ -18,8 +18,9 @@ import google.generativeai as genai
 from chroma_vector_sentence_trasformer import get_collection, get_data, ask_question , get_answer
 from bson import ObjectId
 from dotenv import load_dotenv
+
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 LANGUAGES = {
     "hindi": "hi",
@@ -38,6 +39,7 @@ documents = {}
 UPLOAD_FOLDER = tempfile.gettempdir()
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 @app.route('/')
 def home():
     return "Welcome to the NLP API!"
@@ -88,6 +90,7 @@ def fine_tuned_chat():
         return jsonify({'message': response_text})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
 
 @app.route('/upload-document', methods=['POST'])
 def upload_document():
@@ -117,21 +120,36 @@ def upload_document():
 def document_chat():
     document_id = request.form.get('document_id')
     user_message = request.form.get('message')
-    
+
     if not document_id or not user_message:
         return jsonify({'error': 'Document ID and message are required'}), 400
-    
+
     if document_id not in documents:
         return jsonify({'error': 'Document not found'}), 404
+
+    doc_info = documents[document_id]
+    document_path = doc_info['path']
     
-    document_content = documents[document_id]['content']
-    
-    response_text, error = generate_document_response(document_content, user_message)
-    
+    # Get the file extension to handle different file types
+    file_extension = document_path.split('.')[-1].lower()
+
+    response_text, references, error = generate_document_response(
+        document_path=document_path,
+        file_extension=file_extension,
+        user_message=user_message
+    )
+
     if error:
         return jsonify({'error': error}), 500
-    
-    return jsonify({'response': response_text})
+
+    file_url = f"/uploads/{os.path.basename(document_path)}"
+
+    return jsonify({
+        'response': response_text,
+        'references': references,
+        'fileUrl': file_url
+    })
+
 
 # @app.route('/get-answer-from-vector-database', methods=['POST', 'GET'])
 # def get_answerer_from_vector_database():
@@ -362,5 +380,23 @@ def generate_quiz_with_preferences():
 
 # Configure Google Gemini API Key
 #genai.configure(api_key="AIzaSyD5pUujhEudld3niF7fCIIJhYL4l-1wHcc")  # Replace with your actual API key
+
+#------------------------------XAI---------------------------------------------------------#
+# @app.route("/get-lime-explanation", methods=["POST"])
+# def lime_explanation():
+#     question = request.json.get("question")
+#     docs = collection.query(query_texts=[question], n_results=5, include=["documents"])["documents"][0]
+
+#     def predictor(texts):
+#         embeddings = model.encode(texts, normalize_embeddings=True)
+#         query_embedding = model.encode([question], normalize_embeddings=True)[0]
+#         similarities = np.dot(embeddings, query_embedding)
+#         return similarities.reshape(-1, 1)
+
+#     explainer = LimeTextExplainer(class_names=["similarity"])
+#     exp = explainer.explain_instance(question, predictor, num_features=10)
+#     explanation = exp.as_list()
+
+#     return jsonify({"explanation": explanation})
 if __name__ == '__main__':
     app.run(debug=True)

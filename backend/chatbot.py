@@ -8,6 +8,7 @@ from pptx import Presentation
 import json
 import re
 from dotenv import load_dotenv 
+from sentence_transformers import SentenceTransformer, util
 
 # Configure the Gemini API
 
@@ -41,103 +42,162 @@ def generate_chat_response(user_message):
 
 
 def extract_text_from_file(file, file_extension):
-    """Extract text content from different file types"""
+    file_content = file.read()
     
-    try:
-        file_content = file.read()
-        
-        if file_extension == 'txt':
-            # For text files, decode content
-            return file_content.decode('utf-8', errors='replace')
-        
-        elif file_extension == 'pdf':
-            # For PDF files
-            pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
-            text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text() + "\n"
-            return text
-        
-        elif file_extension == 'docx':
-            # For Word documents
-            doc = docx.Document(io.BytesIO(file_content))
-            text = []
-            for para in doc.paragraphs:
-                text.append(para.text)
-            return '\n'.join(text)
-        
-        elif file_extension == 'pptx':
-            # For PowerPoint presentations
-            ppt = Presentation(io.BytesIO(file_content))
-            text = []
-            for slide in ppt.slides:
-                for shape in slide.shapes:
-                    if hasattr(shape, "text"):
-                        text.append(shape.text)
-            return '\n'.join(text)
-        
-        return "Unable to extract text from this document format."
-    
-    except Exception as e:
-        return f"Error extracting text: {str(e)}"
+    if file_extension == 'pdf':
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
+        page_texts = []
+        for i, page in enumerate(pdf_reader.pages):
+            text = page.extract_text()
+            if text:
+                page_texts.append({'page': i+1, 'text': text})
+        return page_texts
+
+    elif file_extension == 'txt':
+        return [{'page': 1, 'text': file_content.decode('utf-8', errors='replace')}]
+
+    elif file_extension == 'docx':
+        doc = docx.Document(io.BytesIO(file_content))
+        text = '\n'.join([para.text for para in doc.paragraphs])
+        return [{'page': 1, 'text': text}]
+
+    elif file_extension == 'pptx':
+        ppt = Presentation(io.BytesIO(file_content))
+        text = '\n'.join(
+            shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, "text")
+        )
+        return [{'page': 1, 'text': text}]
+
+    return []
+
+def chunk_text_by_page(page_texts, chunk_size=500):
+    chunks = []
+    for page_obj in page_texts:
+        page = page_obj['page']
+        text = page_obj['text']
+        sentences = text.split('. ')
+        chunk = ""
+        for sentence in sentences:
+            if len(chunk.split()) + len(sentence.split()) <= chunk_size:
+                chunk += sentence + ". "
+            else:
+                chunks.append({'text': chunk.strip(), 'page': page})
+                chunk = sentence + ". "
+        if chunk:
+            chunks.append({'text': chunk.strip(), 'page': page})
+    return chunks
+
+def retrieve_relevant_chunks(chunks, query, top_k=3):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    texts = [c['text'] for c in chunks]
+    chunk_embeddings = model.encode(texts, convert_to_tensor=True)
+    query_embedding = model.encode(query, convert_to_tensor=True)
+    hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=top_k)
+    return [chunks[hit['corpus_id']] for hit in hits[0]]
 
 def save_uploaded_document(file, upload_folder):
-    """Save an uploaded file and extract its content"""
-    
     if file.filename == '':
         return None, "No selected file"
     
     file_extension = file.filename.split('.')[-1].lower()
-    
     if file_extension not in ['pdf', 'docx', 'pptx', 'txt']:
         return None, "Unsupported file format"
     
     try:
-        # Extract text based on file type
-        content = extract_text_from_file(file, file_extension)
-        
-        # Generate a unique ID for the document
         document_id = str(uuid.uuid4())
-        
-        # Save file to disk
         file_path = os.path.join(upload_folder, document_id + '.' + file_extension)
         file.seek(0)
         file.save(file_path)
+
+        file.seek(0)
+        page_texts = extract_text_from_file(file, file_extension)
         
-        # Return document information
+        # Store the content for future reference
+        content = []
+        for page in page_texts:
+            content.append(page['text'])
+        
         return {
             'id': document_id,
             'filename': file.filename,
-            'content': content,
-            'path': file_path
+            'path': file_path,
+            'page_texts': page_texts,
+            'content': '\n'.join(content)
         }, None
-    
+
     except Exception as e:
         return None, str(e)
 
-def generate_document_response(document_content, user_message, model_name="gemini-2.0-flash"):
-    """Generate a response based on document content and user query"""
-    
+def generate_document_response(document_path, file_extension, user_message, model_name="gemini-2.0-flash"):
+    """
+    Generate a response with document reference highlights
+    """
     try:
-        # Create a prompt that includes document context
-        prompt = f"""
-        Based on the following document content: 
+        page_contexts = []
+        
+        if file_extension == 'pdf':
+            # Read PDF content page by page
+            pdf_reader = PyPDF2.PdfReader(document_path)
+            for i, page in enumerate(pdf_reader.pages):
+                text = page.extract_text()
+                if text:
+                    page_contexts.append({'page': i + 1, 'text': text.strip()})
+        elif file_extension == 'txt':
+            with open(document_path, 'r', encoding='utf-8', errors='replace') as f:
+                text = f.read()
+                page_contexts.append({'page': 1, 'text': text.strip()})
+        elif file_extension == 'docx':
+            doc = docx.Document(document_path)
+            text = '\n'.join([para.text for para in doc.paragraphs])
+            page_contexts.append({'page': 1, 'text': text.strip()})
+        elif file_extension == 'pptx':
+            ppt = Presentation(document_path)
+            text = '\n'.join(
+                shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, "text")
+            )
+            page_contexts.append({'page': 1, 'text': text.strip()})
 
-        {document_content[:10000]}  # Limiting to first 10000 chars to avoid token limits
-        
-        Answer this question: {user_message}
-        
-        If the answer cannot be found in the document, let the user know.
+        # Build prompt with paginated content (limit tokens)
+        limited_context = ""
+        included_pages = []
+        for ctx in page_contexts:
+            if len(limited_context) + len(ctx['text']) > 8000:
+                break
+            limited_context += f"\n\n(Page {ctx['page']}):\n{ctx['text']}"
+            included_pages.append(ctx)
+
+        prompt = f"""
+        You are a helpful assistant. The following is content from a document split by pages.
+        Based on this content, answer the user query at the end.
+
+        {limited_context}
+
+        User Query: {user_message}
+
+        If the answer cannot be found in the document, say so.
+        Also indicate which parts of the document (by page and a few words) were referred to.
         """
-        
-        # Use Gemini to generate a response
+
+        # Get Gemini response
         model = genai.GenerativeModel(model_name)
         response = model.generate_content(prompt)
-        
-        return response.text, None
-    
+        answer = response.text
+
+        # Simple keyword-based match to extract referenced chunks (demo logic)
+        import difflib
+        matched_references = []
+        for page_ctx in included_pages:
+            matches = difflib.get_close_matches(user_message, [page_ctx['text']], n=1, cutoff=0.3)
+            if matches:
+                matched_references.append({
+                    'page': page_ctx['page'],
+                    'text': matches[0][:300]  # limit snippet length
+                })
+
+        return answer, matched_references, None
     except Exception as e:
-        return None, str(e)
+        return None, None, str(e)
+
     
 # def genrate_rag_response(question , context , links):
 #     """
