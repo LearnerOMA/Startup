@@ -84,6 +84,7 @@ def get_answer(question):
         return "No relevant data found"
     
     print("Relevant data found")
+    print("News  :", result)
     return result
 
 
