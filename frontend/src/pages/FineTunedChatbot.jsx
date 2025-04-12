@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Send, Loader2, MessageCircle } from 'lucide-react';
+import ChatMessage from '../components/ChatMessage';
 
 const FineTunedChatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -25,8 +26,8 @@ const FineTunedChatbot = () => {
     const userMessage = {
       id: Date.now(),
       role: 'user',
-      content: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      text: input,
+      timestamp: new Date().toISOString()
     };
 
     // Create new messages array with the user's message
@@ -40,15 +41,18 @@ const FineTunedChatbot = () => {
     try {
       // Send request to backend
       const response = await axios.post('http://localhost:5000/fine-tuned-chat', {
-        messages: updatedMessages
+        messages: updatedMessages.map(msg => ({
+          role: msg.role,
+          content: msg.text
+        }))
       });
 
       // Prepare AI response
       const aiMessage = {
         id: Date.now(),
         role: 'assistant',
-        content: response.data.message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: response.data.message,
+        timestamp: new Date().toISOString()
       };
 
       // Update messages with AI response
@@ -60,8 +64,8 @@ const FineTunedChatbot = () => {
       const errorMessage = {
         id: Date.now(),
         role: 'assistant',
-        content: 'Oops! Something went wrong. Please try again.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: 'Oops! Something went wrong. Please try again.',
+        timestamp: new Date().toISOString()
       };
       
       setMessages(prevMessages => [...prevMessages, errorMessage]);
@@ -92,27 +96,11 @@ const FineTunedChatbot = () => {
         )}
 
         {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`flex ${
-              message.role === 'user' 
-                ? 'justify-end' 
-                : 'justify-start'
-            }`}
-          >
-            <div 
-              className={`max-w-[80%] p-3 rounded-2xl shadow-lg ${
-                message.role === 'user' 
-                  ? 'bg-indigo-700 text-white' 
-                  : 'bg-[#16213e] text-gray-200 border border-gray-700'
-              }`}
-            >
-              {message.content}
-            </div>
-            <span className="text-xs text-gray-400 mt-1">
-              {message.timestamp}
-            </span>
-          </div>
+          <ChatMessage 
+            key={message.id}
+            message={message}
+            isUser={message.role === 'user'}
+          />
         ))}
         
         {/* Loading Indicator */}

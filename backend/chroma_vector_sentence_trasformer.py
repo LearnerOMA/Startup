@@ -9,7 +9,7 @@ from scrapData import scrapdata
 class SentenceTransformerEmbeddingFunction:
     """Custom Embedding Function using Sentence Transformers."""
     
-    def __init__(self, model_name="all-MiniLM-L6-v2"):
+    def __init__(self, model_name="multi-qa-MiniLM-L6-cos-v1"):
         self.model = SentenceTransformer(model_name)
 
     def __call__(self, input):
@@ -29,7 +29,8 @@ client = chromadb.PersistentClient(path="./chroma_db")  # Saves data in "chroma_
 collection = client.get_or_create_collection(
     name="NEWS",
     embedding_function=sentence_transformer_embedding_function,
-    metadata={"distance_function": "cosine"}  # Ensures cosine distance is used
+    #metadata={"distance_function": "cosine"}  # Ensures cosine distance is used
+    metadata={"hnsw:space": "cosine"}  # ✅ FORCE cosine here
 )
 
 # Fetch collection
@@ -62,7 +63,7 @@ def ask_question(question):
     result = collection.query(
         query_texts=[question],
         n_results=3,
-        include=["documents", "metadatas", "distances"]
+        include=["documents", "metadatas", "distances" ]
     )
     return result
 
@@ -73,7 +74,7 @@ def get_answer(question):
     result = ask_question(question)
     
     # Check distance with threshold (cosine distance should be < 0.5)
-    if bool(result["documents"][0]) and result["distances"][0][0] > 1.0:
+    if bool(result["documents"][0]) and result["distances"][0][0] > 0.85:
         print("No relevant data found")
         print("Scraping data .......")
         get_data(question)

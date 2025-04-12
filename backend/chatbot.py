@@ -356,6 +356,7 @@ def generate_rag_response(question, context, links):
     - Provide the answer strictly in JSON format with these keys:
       - "answer" - A detailed, informative, and accurate response based on the context provided.
       - "reference" - A list of reference links (from the provided links).
+      - if no contex rovided then you scrap data from websites and give it to me.
     - Strictly return the JSON format as shown below:
     
     Example 1:
