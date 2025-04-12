@@ -4,13 +4,27 @@ import io
 import uuid
 import docx
 import PyPDF2
+import time
 from pptx import Presentation
 import json
 import re
 from dotenv import load_dotenv 
 from sentence_transformers import SentenceTransformer, util
+import logging
 
-# Configure the Gemini API
+# Create logs folder if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
+# Setup custom logger
+model_logger = logging.getLogger("model_logger")
+model_logger.setLevel(logging.INFO)
+
+# Prevent duplicate logs if this file is reloaded
+if not model_logger.hasHandlers():
+    handler = logging.FileHandler("logs/document_model.log", mode='a')
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    handler.setFormatter(formatter)
+    model_logger.addHandler(handler)
 
 # Initialize the Gemini model
 model = genai.GenerativeModel("gemini-2.0-flash")
@@ -177,11 +191,21 @@ def generate_document_response(document_path, file_extension, user_message, mode
         If the answer cannot be found in the document, say so.
         Also indicate which parts of the document (by page and a few words) were referred to.
         """
+        
+        start_time = time.time()
 
         # Get Gemini response
         model = genai.GenerativeModel(model_name)
         response = model.generate_content(prompt)
         answer = response.text
+        
+        end_time = time.time()
+        response_time = round(end_time - start_time, 2)  
+
+        model_logger.info(f"User Query: {user_message}")
+        model_logger.info(f"Response Time: {response_time} seconds")
+        model_logger.info(f"Model Answer: {answer}")
+        model_logger.info("="*60)
 
         # Simple keyword-based match to extract referenced chunks (demo logic)
         import difflib
